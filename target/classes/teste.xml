@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+      xmlns:http="http://www.mulesoft.org/schema/mule/http"
+      xmlns="http://www.mulesoft.org/schema/mule/core"
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+                          http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+                          http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <http:listener-config name="HTTP_Listener_config" 
+                          doc:name="HTTP Listener config" 
+                          doc:id="750544da-239c-41b7-9253-5879f568650c" 
+                          basePath="teste">
+        <http:listener-connection host="0.0.0.0" port="8082" />
+    </http:listener-config>
+
+    <flow name="testeFlow" doc:id="6671fe14-59f8-4a83-b255-0c403fdaf1ac">
+        <http:listener doc:name="Listener" 
+                       doc:id="854c6a60-2e4c-41cb-acfb-371df43e8151" 
+                       config-ref="HTTP_Listener_config" 
+                       path="/v1"/>
+        <logger level="INFO" 
+                doc:name="Logger" 
+                doc:id="3b675998-5e43-4051-ae56-e8558ec3f101" 
+                message="It will call transformation"/>
+        <set-payload value="#[output application/json&#10;---&#10;payload]" 
+                     doc:name="Set Payload" 
+                     doc:id="d6f6213c-4cef-4c74-9e0e-53c3751e6183"/>
+        <ee:transform doc:name="Transform Message" 
+                      doc:id="777bc099-dcff-45fc-9e5f-323d3555a965">
+            <ee:message>
+				<ee:set-attributes ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	data: {
+		order: {
+			id: payload.data.order.id,
+			lineItems: payload.data.order.lineItems map ( lineItem , indexOfLineItem ) -> {
+				id: lineItem.id,
+				custom: lineItem.custom,
+				quantity: lineItem.quantity
+			}
+		}
+	}
+}]]></ee:set-attributes>
+            </ee:message>
+        </ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="f7170fe7-83fb-4a1b-b5f9-86e96cb8d7e5" message="#[payload]"/>
+    </flow>
+</mule>
