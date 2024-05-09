@@ -9,43 +9,40 @@
                           http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
     <http:listener-config name="HTTP_Listener_config" 
                           doc:name="HTTP Listener config" 
-                          doc:id="750544da-239c-41b7-9253-5879f568650c" 
+                          doc:id="0c92abf5-60c6-4ff4-abd6-e9908990e1da" 
                           basePath="teste">
         <http:listener-connection host="0.0.0.0" port="8082" />
     </http:listener-config>
 
-    <flow name="testeFlow" doc:id="6671fe14-59f8-4a83-b255-0c403fdaf1ac">
+    <configuration-properties doc:name="Configuration properties" doc:id="59091e51-d987-4745-88f0-4bc3d2a73fa7" file="dev.yaml" />
+	<flow name="testeFlow" doc:id="6d89169d-391c-491c-b69e-c723fd853bc2">
         <http:listener doc:name="Listener" 
-                       doc:id="854c6a60-2e4c-41cb-acfb-371df43e8151" 
+                       doc:id="32569823-34fe-4936-9dca-6aa8bdc42f48" 
                        config-ref="HTTP_Listener_config" 
                        path="/v1"/>
         <logger level="INFO" 
                 doc:name="Logger" 
-                doc:id="3b675998-5e43-4051-ae56-e8558ec3f101" 
-                message="It will call transformation"/>
-        <set-payload value="#[output application/json&#10;---&#10;payload]" 
-                     doc:name="Set Payload" 
-                     doc:id="d6f6213c-4cef-4c74-9e0e-53c3751e6183"/>
+                doc:id="02cb6e8f-d9e8-40b5-beda-1e8b747d03a7" 
+                message="#[payload]"/>
         <ee:transform doc:name="Transform Message" 
-                      doc:id="777bc099-dcff-45fc-9e5f-323d3555a965">
+                      doc:id="a80d6ba0-6ad0-47a9-87bf-4624b7e57738">
             <ee:message>
-				<ee:set-attributes ><![CDATA[%dw 2.0
+				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 {
-	data: {
-		order: {
-			id: payload.data.order.id,
-			lineItems: payload.data.order.lineItems map ( lineItem , indexOfLineItem ) -> {
-				id: lineItem.id,
-				custom: lineItem.custom,
-				quantity: lineItem.quantity
-			}
-		}
-	}
-}]]></ee:set-attributes>
+  order: {
+    count: sizeOf(payload.data.order.lineItems filter ((item) -> item.custom.customFieldsRaw[0].name == "isMainLineItem" and item.custom.customFieldsRaw[0].value == true)),
+    lineItems: payload.data.order.lineItems filter ((item) -> item.custom.customFieldsRaw[0].name == "isMainLineItem" and item.custom.customFieldsRaw[0].value == true) map ((rootItem) -> {
+      id: rootItem.id,
+      childs: payload.data.order.lineItems filter ((childItem) -> childItem.custom.customFieldsRaw[1].name == "configuratorId" and childItem.custom.customFieldsRaw[1].value == rootItem.custom.customFieldsRaw[1].value) map ((child) -> {
+        id: child.id
+      })
+    })
+  }
+}]]></ee:set-payload>
             </ee:message>
         </ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="f7170fe7-83fb-4a1b-b5f9-86e96cb8d7e5" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fb64af05-1499-4515-9232-01ec1bfac646" message="#[payload]"/>
     </flow>
 </mule>

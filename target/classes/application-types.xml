@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
   <types:catalog>
-    <types:type name="customFieldRaw" format="json">
+    <types:type name="customRaw" format="json">
       <types:shape format="weave" example="examples/customFieldRaw.json"><![CDATA[%dw 2.0
 
-type customFieldRaw = {|
+type customRaw = {|
   data: {|
     order: {|
       id: String, 
@@ -19,29 +19,16 @@ type customFieldRaw = {|
 ]]></types:shape>
     </types:type>
   </types:catalog>
-  <types:enrichment select="#40932e08-928e-4334-acef-fe3b9f462a33">
+  <types:enrichment select="#a80d6ba0-6ad0-47a9-87bf-4624b7e57738">
     <types:processor-declaration>
       <types:input-event>
         <types:message>
-          <types:payload type="customFieldRaw"/>
+          <types:payload type="customRaw"/>
         </types:message>
       </types:input-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#d6f6213c-4cef-4c74-9e0e-53c3751e6183">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="customFieldRaw"/>
-        </types:message>
-      </types:input-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#777bc099-dcff-45fc-9e5f-323d3555a965">
-    <types:processor-declaration>
       <types:output-event>
         <types:message>
-          <types:attributes type="customFieldRaw"/>
+          <types:payload type="customRaw"/>
         </types:message>
       </types:output-event>
     </types:processor-declaration>
